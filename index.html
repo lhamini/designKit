@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <meta charset='utf-8'>
+      <title>DesignKit</title>
+      <script type='text/javascript' src='https://d3js.org/d3.v5.min.js'></script>
+      <script src="rand.js" charset="utf-8"></script>
+      <script type="text/javascript" src='script.js'></script>
+      <script type="text/javascript" src="d3-jetpack.js"></script>
+      <script src="http://code.jquery.com/jquery.js"></script>
+      <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+      <div id="cahrtsetup" style="display:none;">
+        X name:<input id='xnamein' type="text" value="X"/>
+        X min<input id="min" type="number" value="0"  />
+        X max<input id="max" type="number" value="100" />
+        <button type="button" onclick="resetit()">Set chart</button>
+      </div>
+      <div>
+        <input class="norm" id="button" type="checkbox">Normal</input>
+      </div>
+      <div>
+         <p id='thestats'></p>
+         <p id='modifed'>
+
+           mu: <input id='muq' type="number" value="4.5">
+           sigma: <input id='sigmaq' type="number" value="0.75">
+         </p>
+      </div>
+      <br>
+      <svg id="diagram" style="border:1px solid black"></svg>
+      <br>
+      <button type="button" class="btn btn-primary" onclick="reset()">Clear data</button>
+      <button type="button" class="btn btn-primary" onclick="saveit()">Save data</button>
+      &nbsp; filename: <input id='fname' type="text" value="mydata.csv">
+      <br>
+      <h2>Data table</h2>
+      <div id='divtable'>
+       <table id='datatable'>
+         <tr><th>xname</th><th>yname</th></tr>
+       </table>
+      </div>
+      <script type="text/javascript">
+       var margin = {top: 30, left: 80, right: 30, bottom: 30};
+       var w=500;
+       var h=350;
+       var chartwidth=w - margin.left - margin.right;
+       var chartheight= h - margin.top - margin.bottom;
+       axisLabelSpace = 50;
+       xname='X';
+       xmin=0;
+       xmax=100;
+       ymin=0;
+       ymax=1;
+       legendSpace = 100,
+   		 domainPadding = 0.2,
+   		 mausx=0;
+       xx=0;
+       var mu =document.getElementById('muq').value;
+       var sigma =document.getElementById('sigmaq').value;
+
+       var n = [];
+
+
+       x = d3.scaleLinear()
+             .range([margin.left, margin.left+chartwidth])
+             .domain([xmin,xmax]);
+
+   		 y = d3.scaleLinear()
+             .range([chartheight, margin.top])
+             .domain([0,0.15]);
+
+       function add(a, b) { return a + b; } // gets used for reducing arrays
+
+
+       var myCanvas=d3.select('#diagram')
+                 .attr("width", w)
+                 .attr("height", h);
+
+       viewport = myCanvas.append("g")
+                 .attr("class", "diagram-viewport")
+                 .attr("width", "2250px")
+                 .attr("height", "3300px")
+                 .classed("noselect", true);
+
+
+     	myCanvas.append('g')
+              .attr('class', 'axis')
+              .attr('transform', 'translate(0,' + chartheight + ')')
+              .call(d3.axisBottom(x));
+
+      myCanvas.append('g')
+            	.attr('class', 'axis')
+            	.attr('transform', 'translate(' + margin.left + ',0)')
+            	.call(d3.axisLeft(y));
+
+
+     // axis labels
+    	myCanvas.append('text')
+               .attr('id','xlab')
+               .attr('transform','translate('+ (margin.left+(chartwidth/2))+','+(chartheight+axisLabelSpace)+')')
+        		   .style('text-anchor','middle')
+               .text(xname);
+    	myCanvas.append('text')
+              .attr('id','ylab')
+              .attr('transform','rotate(-90)')
+          		.attr('x',0-(chartheight/2)-margin.top)
+         			.attr('y',margin.left-axisLabelSpace)
+         			.style('text-anchor','middle')
+        			.text('yname');
+
+
+
+
+      // (make) empty array
+      var resetit = function() {
+        data=[];
+         _ptdata = [];
+         xx=[];
+         myx=[];
+         myx2=[];
+         xname = document.getElementById('xnamein').value;
+         xmin = +document.getElementById('min').value;
+         xmax = +document.getElementById('max').value;
+
+         x = d3.scaleLinear().range([margin.left, margin.left+chartwidth]).domain([xmin,xmax]);
+
+         drawit();
+
+              }
+         resetit();
+
+       var reset = function(){
+           window.location.reload();
+       }
+
+      //interactive
+      myCanvas.attr('width', w )
+              .attr('height', h )
+              .on("click", function() {
+             	mausx=d3.mouse(this)[0];
+              console.log(mausx);
+              xx=Math.round(10000*x.invert(mausx))/10000;
+              console.log(xx);
+              _ptdata.push({x:xx});
+              console.log(_ptdata);
+              myx.push(xx);
+              myx2.push(xx*xx);
+              var n = [];
+              var myScale = d3.scaleLinear()
+                                  .domain([30, 70])
+                                  .range([10, 90]);
+              var sigScale = d3.scaleLinear()
+                                  .domain([15, 40])
+                                  .range([0.75,8]);
+              drawit();
+              mu=document.getElementById('muq').value;
+              sigma=document.getElementById('sigmaq').value;
+
+              mu=myScale(mu);
+              sigma=sigScale(sigma);
+
+              var line = d3.line()
+                            .x(function(d) { return x(d[0]); })
+                            .y(function(d) { return y(d[1]); });
+
+              norm = create_dists(n);
+              check_dist(norm);
+
+
+              function create_dists(n){
+
+
+                  for (var i = 0; i < 90; i += 1) {
+                       n.push((norm_pdf(i,mu,sigma)));
+
+                  }
+
+                  norm = n.map(function(d,i) {
+                          return[i,d];
+                      });
+
+                  return [norm];
+              }
+
+              function check_dist(norm){
+
+                     d3.selectAll("input").on("change", function() {
+                         display = this.checked ? chart(0, norm, "show") : chart(0, norm, "show") ;
+                         });
+                 }
+              // add element and transition in
+              function chart(func, data, op){
+                var path = myCanvas.append('path')
+                    .attr('class', 'line')
+                    .attr('d', line(data[0]))
+                    .style("stroke","red")
+                    .style("fill","none")
+                    .transition()
+                    .duration(3000)
+
+                    console.log("path is created")
+
+                  }
+
+              });
+
+              // save the .csv file
+               var saveit=function() {
+              	 	fnm = document.getElementById('fname').value;
+
+              		var csvContent = "data:text/csv;charset=utf-8,";
+              		data.forEach(function(row, index){
+              				srow = row.x + "," + row.y;
+                 			csvContent += index < data.length ? srow+"\n" : srow;
+              		});
+
+              		var encodedUri = encodeURI(csvContent);
+              		var link = document.createElement("a");
+              		link.setAttribute("href", encodedUri);
+              		link.setAttribute("download", fnm);
+              		document.body.appendChild(link); // Required for FF
+
+              link.click();
+               }
+
+              //      var myScale = d3.scaleLinear()
+              //                      .domain([0, 100])
+              //                      .range([1, 10]);
+
+              //       var line = d3.line()
+                //                   .x(function(d) { return x(d[0]); })
+                //                   .y(function(d) { return y(d[1]); });
+
+                     // Here is where the functions are called
+              //       norm = create_dists(n);
+
+              //       check_dist(norm);
+
+              //       function create_dists(n){
+
+
+              //           for (var i = 0; i < 9000; i += 0.1) {
+              //                n.push((norm_pdf(i,mu,sigma)));
+
+                //         }
+
+                //         norm = n.map(function(d,i) {
+                //                 return[i,d];
+                    //         });
+//
+                    //     return [norm];
+                    // }
+                  //   function check_dist(norm){
+
+                  //       d3.selectAll("input").on("change", function() {
+                    //         display = this.checked ? chart(0, norm, "show") : chart(0, norm, "show") ;
+                  //           });
+                  //   }
+                  //   function chart(func, data, op){
+
+                         // add element and transition in
+                //         var path = myCanvas.append('path')
+                //             .attr('class', 'line')
+                //             .attr('d', line(data[0]))
+                //             .style("stroke","red")
+                //             .style("fill","none")
+                  //           .transition()
+                  //           .duration(1500)
+                      //       .attrTween('d', pathTween);
+                  //           console.log("path is created")
+
+                    //     function pathTween() {
+                    //         var interpolate = d3.scaleQuantile()
+                    //                 .domain([0,1])
+                    //                 .range(d3.range(1, data.length + 1));
+                    //         return function(t) {
+                    //           return line(data.slice(0, interpolate(t)));
+                      //       };
+                      //   }
+                    // }
+      </script>
+    </body>
+</html>
