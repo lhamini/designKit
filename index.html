@@ -11,10 +11,10 @@
       <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-      <div id="cahrtsetup" style="display:none;">
+      <div id="cahrtsetup">
         X name:<input id='xnamein' type="text" value="X"/>
         X min<input id="min" type="number" value="0"  />
-        X max<input id="max" type="number" value="100" />
+        X max<input id="max" type="number" value="900" />
         <button type="button" onclick="resetit()">Set chart</button>
       </div>
       <div>
@@ -69,7 +69,7 @@
 
    		 y = d3.scaleLinear()
              .range([chartheight, margin.top])
-             .domain([0,0.15]);
+             .domain([0,0.01]);
 
        function add(a, b) { return a + b; } // gets used for reducing arrays
 
@@ -108,7 +108,7 @@
           		.attr('x',0-(chartheight/2)-margin.top)
          			.attr('y',margin.left-axisLabelSpace)
          			.style('text-anchor','middle')
-        			//.text('yname');
+        	//		.text('yname');
 
 
 
@@ -116,7 +116,11 @@
       // (make) empty array
       var resetit = function() {
         data=[];
+
          _ptdata = [];
+         _normdata=[];
+         _xdrawdata=[];
+         _ydrawdata=[];
          xx=[];
          myx=[];
          myx2=[];
@@ -144,21 +148,39 @@
               xx=Math.round(10000*x.invert(mausx))/10000;
               console.log(xx);
               _ptdata.push({x:xx});
+              for (var i=0; i < _ptdata.length; i++) {
+                _xdrawdata.push(_ptdata[i].x)
+              }
+              for (var i=0; i < _ptdata.length-1; i++) {
+                _ydrawdata.push(_ptdata[i].y)
+              }
+
+              Xminimum = Math.min.apply(Math, _xdrawdata);
+              Xmaximum = Math.max.apply(Math, _xdrawdata);
+              Yminimum = Math.min.apply(Math, _ydrawdata);
+              Ymaximum = Math.max.apply(Math, _ydrawdata);
+
+              console.log('Xminimum',Xminimum,'Xmaximum',Xmaximum);
+              console.log('Yminimum',Yminimum,'Ymaximum',Ymaximum);
               console.log(_ptdata);
               myx.push(xx);
               myx2.push(xx*xx);
               var n = [];
-              var myScale = d3.scaleLinear()
-                                  .domain([30, 70])
-                                  .range([10, 90]);
+
+            //  var myScale = d3.scaleLinear()
+            //                      .domain([xmin/3, xmax/3])
+            //                      .range([xmin+xmin/3, xmax-(xmax/3)]);
               var sigScale = d3.scaleLinear()
-                                  .domain([15, 40])
-                                  .range([0.75,8]);
+                                  .domain([xmin/2, xmax/3])
+                                  .range([(xmin/5)/3,(xmax/5)/2]);
+
               drawit();
               mu=document.getElementById('muq').value;
               sigma=document.getElementById('sigmaq').value;
 
-              mu=myScale(mu);
+
+
+              //mu=myScale(mu);
               sigma=sigScale(sigma);
 
               var line = d3.line()
@@ -172,7 +194,7 @@
               function create_dists(n){
 
 
-                  for (var i = 0; i < 90; i += 1) {
+                  for (var i = 0; i < xmax; i += 1) {
                        n.push((norm_pdf(i,mu,sigma)));
 
                   }
@@ -180,9 +202,23 @@
                   norm = n.map(function(d,i) {
                           return[i,d];
                       });
+                  normin = n.map(function(d,i) {
+                              return[i,d];
+                          });
 
                   return [norm];
+                  return normin;
               }
+
+            console.log(normin);
+            for (var i=0; i < normin.length; i++) {
+              _normdata.push(normin[i][1])
+            }
+
+
+            y = d3.scaleLinear()
+                         .range([Ymaximum, Yminimum])
+                         .domain([0,Math.max.apply(Math, _normdata)]);
 
               function check_dist(norm){
 
