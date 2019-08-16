@@ -167,12 +167,12 @@
               myx2.push(xx*xx);
               var n = [];
 
-            //  var myScale = d3.scaleLinear()
-            //                      .domain([xmin/3, xmax/3])
-            //                      .range([xmin+xmin/3, xmax-(xmax/3)]);
+              var myScale = d3.scaleLinear()
+                                  .domain([xmin/5, xmax/3])
+                                  .range([xmin+xmin/3, xmax-(xmax/3)]);
               var sigScale = d3.scaleLinear()
-                                  .domain([xmin/2, xmax/3])
-                                  .range([(xmin/5)/3,(xmax/5)/2]);
+                                 .domain([xmin/5, xmax/3])
+                                 .range([(xmin/5)/3,(xmax/5)/2]);
 
               drawit();
               mu=document.getElementById('muq').value;
@@ -181,7 +181,7 @@
 
 
               //mu=myScale(mu);
-              sigma=sigScale(sigma);
+              sigma=Math.abs(sigScale(sigma));
 
               var line = d3.line()
                             .x(function(d) { return x(d[0]); })
@@ -194,13 +194,21 @@
               function create_dists(n){
 
 
-                  for (var i = 0; i < xmax; i += 1) {
+                  for (var i = xmin; i < xmax; i += 1) {
                        n.push((norm_pdf(i,mu,sigma)));
+                       //console.log(n);
 
                   }
 
+
                   norm = n.map(function(d,i) {
-                          return[i,d];
+                        var i = xmin;
+                        for (var m in n) {
+                             i += 1;
+                             xmin+=1;
+                             return [i,Number(d)];
+                        };
+                        //return [i,d];
                       });
                   normin = n.map(function(d,i) {
                               return[i,d];
@@ -210,7 +218,7 @@
                   return normin;
               }
 
-            console.log(normin);
+            //console.log(normin);
             for (var i=0; i < normin.length; i++) {
               _normdata.push(normin[i][1])
             }
