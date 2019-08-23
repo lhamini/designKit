@@ -5,8 +5,127 @@
 }
 */
 body{
-  padding: 2%;
-  margin: 2%;
 
+  margin: 0 0 auto;
+  font-family:Arial, Helvetica, sans-serif;
+  font-size: 120%;
+
+}
+
+#heading{
+  display: inline-block;
+  width: 100%;
+  background: #0070ff9c;
+  margin-left: 0;
+  padding-left:0;
+  margin-bottom: 2%;
+
+}
+
+h1{
+  margin-left:2%;
+}
+
+#left {
+  display: inline-block;
+  width: 50%;
+  float: left;
+  margin-left: 2%;
+
+
+
+
+}
+
+#right{
+  display: inline-block;
+  width: 40%;
+  height: 10%;
+  overflow:scroll;
+  border-left: 1px solid blue;
+  margin-left: 2%;
+  padding-left: 2%;
+
+}
+
+#initialsetup{
+  font-size: 20%;
+  margin-left: 8%;
+  padding-left:10%;
+}
+#xbutton {
+ font-size: 80%;
+ margin-left: 15%;
+
+}
+#ybutton{
+  font-size: 80%;
+  margin-left: 15%;
+}
+
+
+
+
+#drawingsetchartbutton {
+  margin-left: 38%;
+
+
+}
+
+#scattersetchartbutton {
+  margin-left: 38%;
+
+
+}
+
+circle.click {
+  stroke: rgba(42,43,103,255);
+  fill: rgba(42,43,103,255))
+}
+
+path {
+  stroke: steelblue;
+  stroke-width: 1;
+  fill: none;
+}
+
+table {
+  border-collapse: collapse;
+  margin-left: 20%;
+
+}
+
+table, th, td {
+  border: 1px solid black;
+  width: 50%;
+  height: 20%;
+  text-align: center;
+  overflow: scroll;
+
+}
+
+th,td{
+    padding: 2%;
+
+}
+
+td{
+  font-size: 60%;
+}
+
+tr:nth-child(even) {background-color: #f2f2f2;}
+
+h2{
+  margin-left: 30%;
+}
+
+.tooltip {
+  position: relative;
+  background-color: black;
+  border: 2px solid black;
+  border-radius: 5px;
+  padding:0.5%;
+  text-align: center;
+  color: blue;
 
 }

@@ -1,6 +1,19 @@
 //drawing function
       var drawit = function() {
-        _viewport = myCanvas.append("g")
+        var margin = {top: 30, left: 80, right: 30, bottom: 30};
+        var w=500;
+        var h=350;
+        var chartwidth=w - margin.left - margin.right;
+        var chartheight= h - margin.top - margin.bottom;
+
+
+
+
+
+        var myCanvas=d3.select('#diagram')
+                  .attr("width", w)
+                  .attr("height", h);
+         _viewport = myCanvas.append("g")
                   .attr("class", "diagram-viewport")
                   .attr("width", "2250px")
                   .attr("height", "3300px")
@@ -142,7 +155,8 @@
                    }
             document.getElementById('muq').value=xm;
             document.getElementById('sigmaq').value=xs;
-          
+
+
 
             // update stats
             d3.select('div p#thestats').text('N = ' + data.length + ' ; ' +
